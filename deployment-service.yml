@@ -1,12 +1,12 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: Deployment # Kubernetes resource kind we are creating
 metadata:
   name: taskmaster-deployment
 spec:
   selector:
     matchLabels:
       app: taskmaster
-  replicas: 3
+  replicas: 3 # Number of replicas that will be created for this deployment
   template:
     metadata:
       labels:
@@ -14,45 +14,24 @@ spec:
     spec:
       containers:
         - name: taskmaster
-          image: sachintech/taskmaster:latest
+          image: sachintech/taskmaster:latest # Image that will be used to containers in the cluster
           imagePullPolicy: Always
           ports:
-            - containerPort: 8080
+            - containerPort: 8080 # The port that the container is running on in the cluster
+
 
 ---
 
-apiVersion: v1
-kind: Service
-metadata:
+apiVersion: v1 # Kubernetes API version
+kind: Service # Kubernetes resource kind we are creating
+metadata: # Metadata of the resource kind we are creating
   name: taskmaster-ssvc
-    annotations:
-    service.beta.kubernetes.io/aws-load-balancer-type: "application"
-    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:{region}:{user id}:certificate/{id}
-    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
 spec:
   selector:
     app: taskmaster
   ports:
-  - name: https
-    port: 443
-    targetPort: 8080
-  type: LoadBalancer
+    - protocol: "TCP"
+      port: 80
+      targetPort: 8080 
+  type: LoadBalancer # type of the service.
 
----
-
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: taskmaster-ingress
-spec:
-  rules:
-  - host: taskadmin.technical-journey.online
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: taskmaster-ssvc
-            port:
-              number: 443
