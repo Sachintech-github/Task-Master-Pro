@@ -1,13 +1,12 @@
-
 apiVersion: apps/v1
-kind: Deployment
+kind: Deployment # Kubernetes resource kind we are creating
 metadata:
   name: taskmaster-deployment
 spec:
   selector:
     matchLabels:
       app: taskmaster
-  replicas: 3
+  replicas: 3 # Number of replicas that will be created for this deployment
   template:
     metadata:
       labels:
@@ -15,10 +14,11 @@ spec:
     spec:
       containers:
         - name: taskmaster
-          image: sachintech/taskmaster:latest
+          image: sachintech/taskmaster:latest # Image that will be used to containers in the cluster
           imagePullPolicy: Always
           ports:
-            - containerPort: 8080
+            - containerPort: 8080 # The port that the container is running on in the cluster
+
 
 ---
 
@@ -26,11 +26,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: taskmaster-ssvc
+  namespace: webapps
 spec:
   selector:
     app: taskmaster
   ports:
-    - protocol: TCP
+    - protocol: "TCP"
       port: 80
       targetPort: 8080
   type: ClusterIP
@@ -41,6 +42,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: taskmaster-ingress
+  namespace: webapps
   annotations:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
@@ -48,7 +50,8 @@ metadata:
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:330859521773:certificate/31ec9df6-5b5e-45bf-aa9d-68f65159697a
 spec:
   rules:
-    - http:
+    - host: taskadmin.technical-journey.online
+      http:
         paths:
           - path: /
             pathType: Prefix
@@ -57,3 +60,4 @@ spec:
                 name: taskmaster-ssvc
                 port:
                   number: 80
+
